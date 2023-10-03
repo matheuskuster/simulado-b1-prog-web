@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// datasource db {
+//   provider = "sqlite"
+//   url      = "file:./dev.db"
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Paciente {
+  id      String @id @default(uuid())
+  nome    String
+  senha   Int
+  usuario String
+
+  @@map("pacientes")
+}
+
+model Secretaria {
+  id   String @id @default(uuid())
+  nome String
+  rg   Int    @unique
+
+  @@map("secretarias")
+}
+
+model Consulta {
+  id           String   @id @default(uuid())
+  data         DateTime @db.Date
+  nomePaciente String
+  nomeDentista String
+
+  @@map("consultas")
+}
+
+model Agenda {
+  id           String   @id @default(uuid())
+  data         DateTime @db.Date
+  nomePaciente String
+
+  @@map("agenda")
+}
