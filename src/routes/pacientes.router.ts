@@ -24,7 +24,7 @@ pacientesRouter.get('/:id', async (req: Request, res: Response) => {
 
 pacientesRouter.post('/', async (req: Request, res: Response) => {
   const paciente = await pacientesController.create({
-    name: req.body.name,
+    name: req.body.nome,
     senha: req.body.senha,
     usuario: req.body.usuario,
   });

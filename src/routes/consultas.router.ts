@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 import { ConsultasController } from '@/controllers/consultas.controller';
 
@@ -6,7 +6,7 @@ export const consultasRouter = express.Router();
 
 const consultasController = new ConsultasController();
 
-consultasRouter.get('/', async (req, res) => {
+consultasRouter.get('/', async (req: Request, res: Response) => {
   const consultas = await consultasController.search({
     id: req.query.id as string,
     namePaciente: req.query.nomePaciente as string,
@@ -16,14 +16,14 @@ consultasRouter.get('/', async (req, res) => {
   return res.status(200).json(consultas);
 });
 
-consultasRouter.get('/:id', async (req, res) => {
+consultasRouter.get('/:id', async (req: Request, res: Response) => {
   const consulta = await consultasController.read(req.params.id);
   return res.status(200).json(consulta);
 });
 
-consultasRouter.post('/', async (req, res) => {
+consultasRouter.post('/', async (req: Request, res: Response) => {
   const consulta = await consultasController.create({
-    date: req.body.date,
+    date: req.body.data,
     namePaciente: req.body.nomePaciente,
     nameDentista: req.body.nomeDentista,
   });
@@ -31,9 +31,9 @@ consultasRouter.post('/', async (req, res) => {
   return res.status(201).json(consulta);
 });
 
-consultasRouter.put('/:id', async (req, res) => {
+consultasRouter.put('/:id', async (req: Request, res: Response) => {
   const consulta = await consultasController.update(req.params.id, {
-    date: req.body.date,
+    date: req.body.data,
     namePaciente: req.body.nomePaciente,
     nameDentista: req.body.nomeDentista,
   });
@@ -41,7 +41,7 @@ consultasRouter.put('/:id', async (req, res) => {
   return res.status(200).json(consulta);
 });
 
-consultasRouter.delete('/:id', async (req, res) => {
+consultasRouter.delete('/:id', async (req: Request, res: Response) => {
   const consulta = await consultasController.delete(req.params.id);
   return res.status(200).json(consulta);
 });
