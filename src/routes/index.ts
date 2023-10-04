@@ -13,7 +13,7 @@ export function makeRoutes(controllers: Controllers) {
   router.use('/pacientes', pacientesRouter(controllers.pacientesController));
   router.use('/consultas', consultasRouter(controllers.consultasController));
   router.use('/secretarias', secretariasRouter(controllers.secretariasController));
-  router.use('/agendas', secretariasRouter);
+  router.use('/agendas', agendasRouter(controllers.agendasController));
 
   return router;
 }
