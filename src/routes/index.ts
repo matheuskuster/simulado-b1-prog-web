@@ -5,9 +5,15 @@ import { consultasRouter } from './consultas.router';
 import { pacientesRouter } from './pacientes.router';
 import { secretariasRouter } from './secretarias.router';
 
-export const router = express.Router();
+import { Controllers } from '@/controllers';
 
-router.use('/pacientes', pacientesRouter);
-router.use('/consultas', consultasRouter);
-router.use('/agendas', agendasRouter);
-router.use('/secretarias', secretariasRouter);
+export function makeRoutes(controllers: Controllers) {
+  const router = express.Router();
+
+  router.use('/pacientes', pacientesRouter(controllers.pacientesController));
+  router.use('/consultas', consultasRouter);
+  router.use('/agendas', agendasRouter);
+  router.use('/secretarias', secretariasRouter);
+
+  return router;
+}

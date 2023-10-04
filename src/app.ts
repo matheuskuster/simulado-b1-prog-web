@@ -1,25 +1,35 @@
+import 'express-async-errors';
+
 import cors from 'cors';
-import express, { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
+import express from 'express';
 import morgan from 'morgan';
 
-import { router } from './routes';
+import { makeControllers } from './controllers';
+import { errorHandler } from './middlewares/errorHandler';
+import { makeModels } from './models';
+import { makeRoutes } from './routes';
 
 export function createApp() {
   const app = express();
 
+  // Create models and controllers using the factory functions
+  const models = makeModels();
+  const controllers = makeControllers(models);
+
+  // Enable CORS
   app.use(cors());
+
+  // Enable JSON body parsing
   app.use(express.json());
+
+  // Enable logging
   app.use(morgan('dev'));
-  app.use(router);
 
-  app.use((err: ErrorRequestHandler, req: Request, res: Response, next: NextFunction) => {
-    console.error(err);
+  // Create routes using the factory function
+  app.use(makeRoutes(controllers));
 
-    return res.status(500).json({
-      status: 'error',
-      message: 'Internal server error',
-    });
-  });
+  // Create error handler middleware
+  app.use(errorHandler);
 
   return app;
 }

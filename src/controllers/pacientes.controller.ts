@@ -1,67 +1,75 @@
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express';
+
+import { AppError } from '@/errors/AppError';
+import { PacientesModel } from '@/models/pacientes.model';
+import { zParse } from '@/utils/zodParse';
+import { pacienteSchemas } from '@/validators/paciente.validator';
 
 export class PacientesController {
-  private prisma: PrismaClient;
+  constructor(private readonly pacientesModel: PacientesModel) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  async create(req: Request, res: Response) {
+    const { body } = await zParse(pacienteSchemas.create, req);
 
-  async create(body: { name: string; senha: number; usuario: string }) {
-    const paciente = await this.prisma.paciente.create({
-      data: {
-        nome: body.name,
-        senha: body.senha,
-        usuario: body.usuario,
-      },
+    const paciente = await this.pacientesModel.create({
+      nome: body.nome,
+      senha: body.senha,
+      usuario: body.usuario,
     });
 
-    return paciente;
+    return res.status(201).json(paciente);
   }
 
-  async read(id: string) {
-    const paciente = await this.prisma.paciente.findUnique({
-      where: {
-        id,
-      },
+  async read(req: Request, res: Response) {
+    const { params } = await zParse(pacienteSchemas.read, req);
+
+    const paciente = await this.pacientesModel.findById(params.id);
+
+    if (!paciente) {
+      throw new AppError('Paciente não encontrado', 404);
+    }
+
+    return res.status(200).json(paciente);
+  }
+
+  async update(req: Request, res: Response) {
+    const { params, body } = await zParse(pacienteSchemas.update, req);
+
+    const foundPaciente = await this.pacientesModel.findById(params.id);
+
+    if (!foundPaciente) {
+      throw new AppError('Paciente não encontrado', 404);
+    }
+
+    const paciente = await this.pacientesModel.update(params.id, {
+      nome: body.nome,
+      senha: body.senha,
+      usuario: body.usuario,
     });
 
-    return paciente;
+    return res.status(200).json(paciente);
   }
 
-  async update(id: string, body: Partial<{ name: string; senha: number; usuario: string }>) {
-    const paciente = await this.prisma.paciente.update({
-      where: {
-        id,
-      },
-      data: {
-        nome: body.name,
-        senha: body.senha,
-        usuario: body.usuario,
-      },
-    });
+  async delete(req: Request, res: Response) {
+    const { params } = await zParse(pacienteSchemas.delete, req);
 
-    return paciente;
+    const paciente = await this.pacientesModel.delete(params.id);
+
+    if (!paciente) {
+      throw new AppError('Paciente não encontrado', 404);
+    }
+
+    return res.status(204).json();
   }
 
-  async delete(id: string) {
-    const paciente = await this.prisma.paciente.delete({
-      where: {
-        id,
-      },
-    });
+  async search(req: Request, res: Response) {
+    const { query } = await zParse(pacienteSchemas.search, req);
 
-    return paciente;
-  }
-
-  async search(params: Partial<{ id: string; name: string; senha: number; usuario: string }>) {
-    const pacientes = await this.prisma.paciente.findMany({
-      where: {
-        id: params.id,
-        nome: { contains: params.name },
-        senha: params.senha,
-        usuario: { contains: params.usuario },
-      },
+    const pacientes = await this.pacientesModel.search({
+      id: query.id,
+      nome: query.nome,
+      senha: query.senha,
+      usuario: query.usuario,
     });
 
     return pacientes;
