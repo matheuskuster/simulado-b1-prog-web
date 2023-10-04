@@ -1,66 +1,74 @@
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express';
+
+import { AppError } from '@/errors/AppError';
+import { SecretariasModel } from '@/models/secretarias.model';
+import { zParse } from '@/utils/zodParse';
+import { secretariaSchemas } from '@/validators/secretaria.validator';
 
 export class SecretariasController {
-  private prisma: PrismaClient;
+  constructor(private readonly secretariasModel: SecretariasModel) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
-  }
+  async create(req: Request, res: Response) {
+    const { body } = await zParse(secretariaSchemas.create, req);
 
-  async create(body: { name: string; rg: number }) {
-    const secretaria = await this.prisma.secretaria.create({
-      data: {
-        nome: body.name,
-        rg: body.rg,
-      },
+    const secretaria = await this.secretariasModel.create({
+      nome: body.nome,
+      rg: body.rg,
     });
 
-    return secretaria;
+    return res.status(201).json(secretaria);
   }
 
-  async read(id: string) {
-    const secretaria = await this.prisma.secretaria.findUnique({
-      where: {
-        id,
-      },
-    });
+  async read(req: Request, res: Response) {
+    const { params } = await zParse(secretariaSchemas.read, req);
 
-    return secretaria;
+    const secretaria = await this.secretariasModel.findById(params.id);
+
+    if (!secretaria) {
+      throw new AppError('Secretaria não encontrado', 404);
+    }
+
+    return res.status(200).json(secretaria);
   }
 
-  async update(id: string, body: Partial<{ name: string; rg: number }>) {
-    const secretaria = await this.prisma.secretaria.update({
-      where: {
-        id,
-      },
-      data: {
-        nome: body.name,
-        rg: body.rg,
-      },
+  async update(req: Request, res: Response) {
+    const { params, body } = await zParse(secretariaSchemas.update, req);
+
+    const foundSecretaria = await this.secretariasModel.findById(params.id);
+
+    if (!foundSecretaria) {
+      throw new AppError('Secretaria não encontrado', 404);
+    }
+
+    const secretaria = await this.secretariasModel.update(params.id, {
+      nome: body.nome,
+      rg: body.rg,
     });
 
-    return secretaria;
+    return res.status(200).json(secretaria);
   }
 
-  async delete(id: string) {
-    const secretaria = await this.prisma.secretaria.delete({
-      where: {
-        id,
-      },
-    });
+  async delete(req: Request, res: Response) {
+    const { params } = await zParse(secretariaSchemas.delete, req);
 
-    return secretaria;
+    const secretaria = await this.secretariasModel.delete(params.id);
+
+    if (!secretaria) {
+      throw new AppError('Paciente não encontrado', 404);
+    }
+
+    return res.status(204).json();
   }
 
-  async search(params: Partial<{ id: string; name: string; rg: number }>) {
-    const secretarias = await this.prisma.secretaria.findMany({
-      where: {
-        id: params.id,
-        nome: { contains: params.name },
-        rg: params.rg,
-      },
+  async search(req: Request, res: Response) {
+    const { query } = await zParse(secretariaSchemas.search, req);
+
+    const secretarias = await this.secretariasModel.search({
+      id: query.id,
+      nome: query.nome,
+      rg: query.rg,
     });
 
-    return secretarias;
+    return res.status(200).json(secretarias);
   }
 }

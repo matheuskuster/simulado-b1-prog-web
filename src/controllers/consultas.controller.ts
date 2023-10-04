@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { AppError } from '@/errors/AppError';
 import { ConsultasModel } from '@/models/consultas.model';
 import { zParse } from '@/utils/zodParse';
 import { consultaSchemas } from '@/validators/consulta.validator';
@@ -20,11 +21,21 @@ export class ConsultasController {
 
     const consulta = await this.consultasModel.findById(params.id);
 
+    if (!consulta) {
+      throw new AppError('Consulta não encontrada', 404);
+    }
+
     return res.status(200).json(consulta);
   }
 
   async update(req: Request, res: Response) {
     const { params, body } = await zParse(consultaSchemas.update, req);
+
+    const foundConsulta = await this.consultasModel.findById(params.id);
+
+    if (!foundConsulta) {
+      throw new AppError('Consulta não encontrada', 404);
+    }
 
     const consulta = await this.consultasModel.update(params.id, body);
 
@@ -34,7 +45,11 @@ export class ConsultasController {
   async delete(req: Request, res: Response) {
     const { params } = await zParse(consultaSchemas.delete, req);
 
-    await this.consultasModel.delete(params.id);
+    const consulta = await this.consultasModel.delete(params.id);
+
+    if (!consulta) {
+      throw new AppError('Consulta não encontrada', 404);
+    }
 
     return res.status(204).json();
   }
