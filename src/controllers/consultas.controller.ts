@@ -1,74 +1,49 @@
-import { PrismaClient } from '@prisma/client';
+import { Request, Response } from 'express';
+
+import { ConsultasModel } from '@/models/consultas.model';
+import { zParse } from '@/utils/zodParse';
+import { consultaSchemas } from '@/validators/consulta.validator';
 
 export class ConsultasController {
-  private prisma: PrismaClient;
+  constructor(private readonly consultasModel: ConsultasModel) {}
 
-  constructor() {
-    this.prisma = new PrismaClient();
+  async create(req: Request, res: Response) {
+    const { body } = await zParse(consultaSchemas.create, req);
+
+    const consulta = await this.consultasModel.create(body);
+
+    return res.status(201).json(consulta);
   }
 
-  async create(body: { date: Date; namePaciente: string; nameDentista: string }) {
-    const consulta = await this.prisma.consulta.create({
-      data: {
-        data: body.date,
-        nomeDentista: body.nameDentista,
-        nomePaciente: body.namePaciente,
-      },
-    });
+  async read(req: Request, res: Response) {
+    const { params } = await zParse(consultaSchemas.read, req);
 
-    return consulta;
+    const consulta = await this.consultasModel.findById(params.id);
+
+    return res.status(200).json(consulta);
   }
 
-  async read(id: string) {
-    const consulta = await this.prisma.consulta.findUnique({
-      where: {
-        id,
-      },
-    });
+  async update(req: Request, res: Response) {
+    const { params, body } = await zParse(consultaSchemas.update, req);
 
-    return consulta;
+    const consulta = await this.consultasModel.update(params.id, body);
+
+    return res.status(200).json(consulta);
   }
 
-  async update(
-    id: string,
-    body: Partial<{ date: Date; namePaciente: string; nameDentista: string }>,
-  ) {
-    const consulta = await this.prisma.consulta.update({
-      where: {
-        id,
-      },
-      data: {
-        data: body.date,
-        nomeDentista: body.nameDentista,
-        nomePaciente: body.namePaciente,
-      },
-    });
+  async delete(req: Request, res: Response) {
+    const { params } = await zParse(consultaSchemas.delete, req);
 
-    return consulta;
+    await this.consultasModel.delete(params.id);
+
+    return res.status(204).json();
   }
 
-  async delete(id: string) {
-    const consulta = await this.prisma.consulta.delete({
-      where: {
-        id,
-      },
-    });
+  async search(req: Request, res: Response) {
+    const { query } = await zParse(consultaSchemas.search, req);
 
-    return consulta;
-  }
+    const consultas = await this.consultasModel.search(query);
 
-  async search(
-    params: Partial<{ id: string; date: Date; namePaciente: string; nameDentista: string }>,
-  ) {
-    const consultas = await this.prisma.consulta.findMany({
-      where: {
-        id: params.id,
-        data: params.date,
-        nomeDentista: { contains: params.nameDentista },
-        nomePaciente: { contains: params.namePaciente },
-      },
-    });
-
-    return consultas;
+    return res.status(200).json(consultas);
   }
 }

@@ -11,7 +11,7 @@ export function makeRoutes(controllers: Controllers) {
   const router = express.Router();
 
   router.use('/pacientes', pacientesRouter(controllers.pacientesController));
-  router.use('/consultas', consultasRouter);
+  router.use('/consultas', consultasRouter(controllers.consultasController));
   router.use('/agendas', agendasRouter);
   router.use('/secretarias', secretariasRouter);
 

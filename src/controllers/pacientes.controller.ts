@@ -72,6 +72,6 @@ export class PacientesController {
       usuario: query.usuario,
     });
 
-    return pacientes;
+    return res.status(200).json(pacientes);
   }
 }
