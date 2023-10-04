@@ -6,10 +6,10 @@ Esta é uma API desenvolvida para um simulado de programação avançada para we
 ### Pré-requisitos
 Antes de começar, certifique-se de que você tenha os seguintes pré-requisitos instalados em seu sistema:
 
-- Docker (para usar o PostgreSQL via Docker Compose) - opcional
+- Docker (para usar o PostgreSQL via Docker Compose) (opcional)
 - Node.js (v14 ou superior)
--npm ou Yarn (gerenciadores de pacotes JavaScript)
-- Insomnia (para testar a API) - opcional
+- npm ou Yarn (gerenciadores de pacotes JavaScript)
+- Insomnia (para testar a API) (opcional)
 
 ### Configuração Inicial
 Clone ou baixe este repositório para o seu sistema.
@@ -22,6 +22,10 @@ Dentro do diretório, instale as dependências do Node.js executando o seguinte 
 npm install
 # ou yarn
 ```
+
+Após isso, duplique o arquivo `.env.example` e renomeia a cópia para `.env`. Alteres as variáveis de ambiente a seu critério.
+
+*Ao usar o Postgres como banco de dados, a variável DATABASE_URL é obrigatória.*
 
 ### Configuração do Banco de Dados
 Esta aplicação oferece suporte tanto ao PostgreSQL quanto ao SQLite como bancos de dados. Por padrão, está configurado para usar o PostgreSQL via Docker Compose. Se você preferir usar o SQLite, siga estas etapas:
